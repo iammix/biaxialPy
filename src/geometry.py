@@ -56,3 +56,23 @@ def line_polygon_collisions(angle_deg, y_intersect, x_vertex, y_vertex) -> tuple
                     yint.append(y)
 
     return xint, yint
+
+
+def polygon_area(x, y, signed=False) -> float:
+    """
+    :return: Return the area of a non-intersecting polygon given the coordinates of its vertices
+    """
+    if x is not None and y is not None:
+        x = x + [x[0]]
+        y = y + [y[0]]
+
+        a1 = [x[i] * y[i + 1] for i in range(len(x) - 1)]
+        a2 = [y[i] * x[i + 1] for i in range(len(y) - 1)]
+        if signed:
+            A = 1 / 2 * (sum(a1) - sum(a2))
+        else:
+            A = 1 / 2 * abs(sum(a1) - sum(a2))
+    else:
+        A = 0
+
+    return A

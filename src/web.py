@@ -300,4 +300,3 @@ def calc_surf_and_store(xy, sv_col, xsys, rebar_col):
     fyd = fyk / gamma_s
     As = np.pi() * 25 ** 2 / 4
 
-    
