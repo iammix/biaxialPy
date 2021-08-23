@@ -153,4 +153,6 @@ def order_polygon_vertices(x_vertices, y_vertices, x_section_vertices, y_section
         a = sorted(a)
     else:
         # TODO: Sort list of angles in clockwise order
+        # assignees: iammix
+        # labels: todo
         pass
