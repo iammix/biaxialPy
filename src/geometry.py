@@ -1,4 +1,4 @@
-from math import sqrt, pi, tan,
+from math import sqrt, pi, tan, atan2
 
 import numpy as np
 
@@ -141,33 +141,16 @@ def order_polygon_vertices(x_vertices, y_vertices, x_section_vertices, y_section
 
     Cx, Cy = polygon_centroid(x_section_vertices, y_section_vertices)
 
-    a0 =[]
+    a0 = []
     for i in range(len(x_t)):
-        a0.append(atan2
+        a0.append(atan2((y_t[i] - Cy), (x_t[i] - Cx)) * 180 / pi)
+    if counterclockwise:
+        pos = [p for p in a0 if p >= 0]
+        neg = [n for n in a0 if n < 0]
+        a = pos + [360 + angle for angle in neg]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        idx = sorted(range(len(a0)), key=lambda j: a0[j], reverse=False)
+        a = sorted(a)
+    else:
+        # TODO: Sort list of angles in clockwise order
+        pass
