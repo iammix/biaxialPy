@@ -1,4 +1,5 @@
-from math import sqrt, pi, cos, sin, tan, atan, atan2
+from math import sqrt, pi, tan,
+
 import numpy as np
 
 
@@ -76,3 +77,97 @@ def polygon_area(x, y, signed=False) -> float:
         A = 0
 
     return A
+
+
+def point_to_line_dist(x, y, x0, y0, x1, y1, signed=True):
+    """
+    :param x:
+    :param y:
+    :param x0:
+    :param y0:
+    :param x1:
+    :param y1:
+    :param signed:
+    :return: The distance from a point (x,y) to a line passing through points (x0,y0) and (x1, y1)
+    """
+
+    if signed:
+        return -((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0)) / sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
+    else:
+        return abs((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0)) / sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
+
+
+def polygon_centroid(x, y, return_area=False):
+    """
+    :param x:
+    :param y:
+    :param return_area:
+    :return: Compute the centroid of a non-self-intersecting polygon given the coordinates of its vertices
+    """
+    A = polygon_area(x, y, signed=True)
+    if A == 0:
+        return np.nan
+
+    else:
+        x = x + [x[0]]
+        y = y + [y[0]]
+        cx = []
+        cy = []
+
+        for i in range(len(x) - 1):
+            cx.append((x[i] + x[i + 1]) * (x[i] * y[i + 1] - x[i + 1] * y[i]))
+            cy.append((y[i] + y[i + 1]) * (x[i] * y[i + 1] - x[i + 1] * y[i]))
+
+        Cx = sum(cx) / (6 * A)
+        Cy = sum(cy) / (6 * A)
+        if return_area:
+            return Cx, Cy, A
+        else:
+            return Cx, Cy
+
+
+def order_polygon_vertices(x_vertices, y_vertices, x_section_vertices, y_section_vertices, counterclockwise=True):
+    """
+    :param x_vertices:
+    :param y_vertices:
+    :param x_section_vertices:
+    :param y_section_vertices:
+    :param counterclockwise:
+    :return: Sort polygon vertices in consecutive circular order (clockwise or counterclockwise measured form positive x-axis)
+    """
+
+    x_t = x_vertices
+    y_t = y_vertices
+
+    Cx, Cy = polygon_centroid(x_section_vertices, y_section_vertices)
+
+    a0 =[]
+    for i in range(len(x_t)):
+        a0.append(atan2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
