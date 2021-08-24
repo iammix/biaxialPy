@@ -214,3 +214,22 @@ def transformed_axial_stiffness(x, y, dia, P, Ec=EC, Es=ES) -> float:
         E = Es
 
         return E * As
+
+
+def strain_field_eval(x, y, P, Mx, My, E, EA, Itx, Ity) -> float:
+    """
+    :return: Return the evaluation of the strain field equation given for external loads P, Mx, My in point (x,y)
+    Plane sections remain plane
+    """
+
+    # Axial Strain
+    eps_P = P / EA
+    # Curvature from bending about x and y axis
+    kappa_x = Mx / (E * Itx)
+    kappa_y = My / (E * Ity)
+
+    # TODO: Check if  strains are larger than the allowed, e.g. eps_cu
+    # assignees: iammix
+    # labels: todo
+
+    return eps_P + y * kappa_x + x * kappa_y
