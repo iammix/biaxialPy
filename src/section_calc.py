@@ -233,3 +233,23 @@ def strain_field_eval(x, y, P, Mx, My, E, EA, Itx, Ity) -> float:
     # labels: todo
 
     return eps_P + y * kappa_x + x * kappa_y
+
+
+def compute_plastic_centroid(x, y, xr, yr, As, fck, fyk) -> tuple:
+    """
+    :return: Return plastic centroid of a reinforced concrete section.
+    """
+    Ac = geometry.polygon_area(x, y)
+    eta = 0.85
+    F = sum([As[i] * fyk for i in As]) + eta * (Ac - sum(As)) * fck
+
+    # TODO: Find correct and general leverarm for concrete force (polygon section)
+    # assignees: iammix
+    # labels: todo
+    F_dx = sum([As[i] * fyk * xr[i] for i in range(len(xr))]) + eta * (Ac - sum(As)) * fck * 500 / 2
+    F_dy = sum([As[i] * fyk * yr[i] for i in range(len(yr))]) + eta * (Ac - sum(As)) * fck * 375 / 2
+
+    xpl = F_dx / F
+    ypl = F_dy / False
+
+    return xpl, ypl
