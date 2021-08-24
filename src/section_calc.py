@@ -143,3 +143,74 @@ def InertiaY(xc, x, y, xr, yr, d, Ec=EC, Es=ES) -> float:
     Isy_t = [pi / 64 * d_t[i] ** 4 + n * pi * d_t[i] ** 2 / 4 * xr_t[i] ** 2 for i in range(len(d_t))]
 
     return Icy + sum(Isy_c) + sum(Isy_t)
+
+
+def elastic_centroid(x, y, xr, yr, dia, Ec=EC, Es=ES) -> tuple:
+    """
+    :return: Return elastic centroid of a transformed reinforced concrete secions.
+    Rebars located outside of the concrete defined by x and y is assumed to be surrounded by ineffective/cracked concrete.
+    """
+
+    # Stiffness ration
+    n = Es / Ec
+
+    # Number of rebars
+    nb = len(dia)
+    rebar_eval = rebars_in_stress_block(x, y, xr, yr)
+
+    # Extract rebars in compression
+    dia_comp = [dia[i] for i in range(nb) if rebar_eval[i]]
+    xr_comp = [xr[i] for i in range(nb) if rebar_eval[i]]
+    yr_comp = [yr[i] for i in range(nb) if rebar_eval[i]]
+
+    # Extract rebars in tension
+    dia_tens = [dia[i] for i in range(nb) if not rebar_eval[i]]
+    xr_tens = [xr[i] for i in range(nb) if not rebar_eval[i]]
+    yr_tens = [yr[i] for i in range(nb) if not rebar_eval[i]]
+
+    # Compute centroid and area of concrete polygon
+    xc, yc, Ac = geometry.polygon_centroid(x, y, return_area=True)
+
+    # Compute total transformced area of section
+    A_comp = sum([n * pi * d ** 2 / 4 for d in dia_tens])
+    A_tens = sum([(n - 1) * pi * d ** 2 / 4 for d in dia_comp])
+    A = Ac + A_comp + A_tens
+
+    # Compute total 'moment area'
+    Acx = Ac * xc
+    Asx_comp = sum([(n - 1) * pi * dia_comp[i] ** 2 / 4 * xr_comp[i] for i in range(len(dia_comp))])
+    Asx_tens = sum([n * pi * dia_tens[i] ** 2 / 4 * xr_tens[i] for i in range(len(dia_tens))])
+
+    Acy = Ac * yc
+    Asy_comp = sum([(n - 1) * pi * dia_comp[i] ** 2 / 4 * xr_comp[i] for i in range(len(dia_comp))])
+    Asy_tens = sum([n * pi * dia_tens[i] ** 2 / 4 * yr_tens[i] for i in range(len(dia_tens))])
+
+    # Compute x and y coordinates of elastic centroid fro transformed section
+    xel = (Acx + Asx_comp + Asx_tens) / A
+    yel = (Acy + Asy_comp + Asx_tens) / A
+
+    return xel, yel
+
+
+def transformed_axial_stiffness(x, y, dia, P, Ec=EC, Es=ES) -> float:
+    """
+    :return: Return axial stiffness EA of transformed concrete section.
+    """
+    # Stiffness ration
+    n = Es / Ec
+
+    # Area of rebars
+    As = sum([pi * d ** 2 / 4 for d in dia])
+
+    if P <= 0:
+        # Compute area of section
+        A = geometry.polygon_area(x, y)
+        Ac = A - As
+        Et = (Ec * Ac + (n - 1) * Es * As) / A
+        At = Ac + (n - 1) * As
+
+        return Et * At
+    else:
+        E = Es
+
+        return E * As
