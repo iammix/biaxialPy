@@ -100,6 +100,7 @@ def InertiaX(yc, x, y, xr, yr, d, Ec=EC, Es=ES) -> float:
 
     return Icx + sum(Isx_c) + sum(Isx_t)
 
+
 def InertiaY(xc, x, y, yr, d, Ec=EC, Es=ES):
     """
     :param xc:
@@ -111,3 +112,14 @@ def InertiaY(xc, x, y, yr, d, Ec=EC, Es=ES):
     :param Es:
     :return: Return moment of inertia about the y-axis
     """
+
+    n = Es / Ec
+    nv = len(y)
+
+    # Create a closed polygon by adding the first point to the end of the coordinate lists
+    x = x + [x[0]]
+    y = y + [y[0]]
+
+    # Convert y-coordinates to specified axis of rotation
+
+    x = [xc - i for i in x]
