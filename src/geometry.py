@@ -79,15 +79,8 @@ def polygon_area(x, y, signed=False) -> float:
     return A
 
 
-def point_to_line_dist(x, y, x0, y0, x1, y1, signed=True):
+def point_to_line_dist(x, y, x0, y0, x1, y1, signed=True) -> float:
     """
-    :param x:
-    :param y:
-    :param x0:
-    :param y0:
-    :param x1:
-    :param y1:
-    :param signed:
     :return: The distance from a point (x,y) to a line passing through points (x0,y0) and (x1, y1)
     """
 
@@ -97,11 +90,8 @@ def point_to_line_dist(x, y, x0, y0, x1, y1, signed=True):
         return abs((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0)) / sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
 
 
-def polygon_centroid(x, y, return_area=False):
+def polygon_centroid(x, y, return_area=False) -> tuple:
     """
-    :param x:
-    :param y:
-    :param return_area:
     :return: Compute the centroid of a non-self-intersecting polygon given the coordinates of its vertices
     """
     A = polygon_area(x, y, signed=True)
@@ -126,13 +116,9 @@ def polygon_centroid(x, y, return_area=False):
             return Cx, Cy
 
 
-def order_polygon_vertices(x_vertices, y_vertices, x_section_vertices, y_section_vertices, counterclockwise=True):
+def order_polygon_vertices(x_vertices, y_vertices, x_section_vertices, y_section_vertices,
+                           counterclockwise=True) -> tuple:
     """
-    :param x_vertices:
-    :param y_vertices:
-    :param x_section_vertices:
-    :param y_section_vertices:
-    :param counterclockwise:
     :return: Sort polygon vertices in consecutive circular order (clockwise or counterclockwise measured form positive x-axis)
     """
 
@@ -156,3 +142,50 @@ def order_polygon_vertices(x_vertices, y_vertices, x_section_vertices, y_section
         # assignees: iammix
         # labels: todo
         pass
+
+    x_t = [x_t[i] for i in idx]
+    y_t = [y_t[i] for i in idx]
+
+    return x_t, y_t
+
+
+def sb_eq_eval(angle, na_y, y_shift, x, y) -> float:
+    """
+    :return: evaluation of equation for inner stress block at point (x, y)
+    """
+    return tan(angle) * x - y + na_y - y_shift
+
+
+def get_section_compression_vertices(x, y, na_y, alpha_deg, delta_v) -> tuple:
+    """
+    :return: Returns a list of the concrete section vertices that are in compression
+    """
+    x_compr_vertices = []
+    y_compr_vertices = []
+    alpha = alpha_deg * pi / 180
+
+    for i in range(len(x)):
+        sb_eq_eval_at_each_vertex = sb_eq_eval(alpha, na_y, delta_v, x[i], y[i])
+
+        if alpha_deg <= 90 or alpha_deg > 270:
+            if sb_eq_eval_at_each_vertex < 0:
+                x_compr_vertices.append(x[i])
+                y_compr_vertices.append(y[i])
+
+        if alpha_deg > 90 and alpha_deg <= 270:
+            if sb_eq_eval_at_each_vertex > 0:
+                x_compr_vertices.append(x[i])
+                y_compr_vertices.append(y[i])
+    return x_compr_vertices, y_compr_vertices
+
+
+def point_to_point_dist_3d(P1, P2) -> float:
+    return sqrt((P2[0] - P1[0]) ** 2 + (P2[1] - P2[1]) ** 2 + (P2[2] - P1[2]) ** 2)
+
+
+def line_hull_intersection(U, c_hull) -> float:
+    eq = c_hull.equations.T
+    V, b = eq[:, -1], eq[-1]
+    V = np.transpose(V)
+    alpha = -b / np.dot(V, U)
+    return np.min(alpha[alpha > 0]) * U
