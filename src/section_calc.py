@@ -283,3 +283,16 @@ def compute_dist_to_na(x, y, xr, yr, alpha_deg, na_y) -> tuple:
     dv = [0.0 if x == -0.0 else x for x in dv]
 
     return dv, dr
+
+
+def compressive_stress_block_geometry(x, y, dv, dr, alpha_deg, na_y, lamda=0.8):
+    """
+    :return: Return compressive stress block geometry
+    """
+
+    if all(d >= 0 for d in dv):
+        cross_section_state = "PURE TENSION"
+        # Distance from neutral axis to extreme tension bar ( distances are positive)
+        c = max([d for d in dr if d > 0])
+
+        # Set vertices of stress block
