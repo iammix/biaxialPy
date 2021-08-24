@@ -101,7 +101,7 @@ def InertiaX(yc, x, y, xr, yr, d, Ec=EC, Es=ES) -> float:
     return Icx + sum(Isx_c) + sum(Isx_t)
 
 
-def InertiaY(xc, x, y, yr, d, Ec=EC, Es=ES):
+def InertiaY(xc, x, y, xr, yr, d, Ec=EC, Es=ES) -> float:
     """
     :param xc:
     :param x:
@@ -123,3 +123,23 @@ def InertiaY(xc, x, y, yr, d, Ec=EC, Es=ES):
     # Convert y-coordinates to specified axis of rotation
 
     x = [xc - i for i in x]
+    xr = [xc - i for i in xr]
+
+    # Compute list of terms for summation
+
+    Icy_list = [1 / 12 * (x[i] ** 2 + x[i] * x[i + 1] + x[i + 1] ** 2) * (x[i] * y[i + 1] - x[i + 1] - x[i + 1] * y[i])
+                for i in range(nv)]
+
+    # Sum list elements and use absolute value so order can be clockwise or counter-clockwise
+    Icy = abs(sum(Icy_list))
+
+    # Create seperate lists for rebars in compression (c) and tension(t)
+    xr_c, _, d_c, xr_t, _, d_t = compression_tension_rebars(x, y, xr, yr, d)
+
+    # Rebars in compression
+    Isy_c = [pi / 64 * d_c[i] ** 4 + (n - 1) * pi * d_c[i] ** 2 / 4 * xr_c[i] ** 2 for i in range(len(d_c))]
+
+    # Rebars in tension
+    Isy_t = [pi / 64 * d_t[i] ** 4 + n * pi * d_t[i] ** 2 / 4 * xr_t[i] ** 2 for i in range(len(d_t))]
+
+    return Icy + sum(Isy_c) + sum(Isy_t)
