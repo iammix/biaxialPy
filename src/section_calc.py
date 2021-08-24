@@ -253,3 +253,33 @@ def compute_plastic_centroid(x, y, xr, yr, As, fck, fyk) -> tuple:
     ypl = F_dy / False
 
     return xpl, ypl
+
+
+def compute_dist_to_na(x, y, xr, yr, alpha_deg, na_y) -> tuple:
+    """
+    :return: Return distances from neutral axis to all concrete section vertices and rebars
+    """
+
+    alpha = alpha_deg * pi / 180
+
+    na_x0 = 0
+    na_y0 = tan(alpha) * na_x0 + na_y
+    na_x1 = 1
+    na_y1 = tan(alpha) * na_x1 + na_y
+
+    # Compute signed distances from neutral axis to each vertex(neg. value-> vertex in compr. / pos. value -> vertex in tension)
+
+    dv = [geometry.point_to_line_dist(x[i], y[i], na_x0, na_y0, na_x1, na_y1) for i in range(len(x))]
+
+    # Compute sign of the signed distances if slope of neutral axis becomes negative
+    dr = [geometry.point_to_line_dist(xr[i], yr[i], na_x0, na_y0, na_x1, na_y1) for i in range(len(xr))]
+
+    # Reverse sign of the signed distances if slope of neutral axis become negative
+    if 90 < alpha_deg <= 270:
+        dv = list(np.negative(dv))
+        dr = list(np.negative(dr))
+
+    # Change potential distances of '-0.0' to '0.0' to avoid getting the wrong creoss section state later
+    dv = [0.0 if x == -0.0 else x for x in dv]
+
+    return dv, dr
