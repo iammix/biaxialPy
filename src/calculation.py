@@ -5,7 +5,7 @@ import geometry
 import section_calc as sc
 
 
-def find_na(x, y, xr, yr, dia, P, Mx, My, fyd, Ec=30 * 10 ** 6, Es=200 * 10 ** 6):
+def find_na(x, y, xr, yr, dia, P, Mx, My, fyd, Ec=30*10**6, Es=200*10**6):
     itr_yn = 0
     max_itr = 1
     tol = 0.1
@@ -19,7 +19,7 @@ def find_na(x, y, xr, yr, dia, P, Mx, My, fyd, Ec=30 * 10 ** 6, Es=200 * 10 ** 6
     # Iterate intersection between neutral axis and y-axis until P is satisfactory
     while (abs(yn_error) > tol and itr_yn < max_itr):
         itr_yn += 1
-        EtAt = sc.transformed_axial_stiffness(x, y, xr, yr, dia, P, Ec=Ec, Es=Es)
+        EtAt = sc.transformed_axial_stiffness(x, y, xr, yr, dia, P, Ec, Es)
 
         # Compute distances from concrete vertices and rebars to neutral axis
         dv, dr = sc.compute_dist_to_na(x, y, xr, yr, 0, yn)
@@ -34,8 +34,8 @@ def find_na(x, y, xr, yr, dia, P, Mx, My, fyd, Ec=30 * 10 ** 6, Es=200 * 10 ** 6
         xel, yel = sc.elastic_centroid(x, y, xr, yr, dia, Ec=Ec, Es=Es)
 
         # Compute transformed moment of inertia
-        Itx = sc.InertiaX(yel, x, y, xr, yr, dia, Ec=Ec, Es=Es)
-        Ity = sc.InertiaY(xel, x, y, xr, yr, dia, Ec=Ec, Es=Es)
+        Itx = sc.Itx(yel, x, y, xr, yr, dia, Ec=Ec, Es=Es)
+        Ity = sc.Ity(xel, x, y, xr, yr, dia, Ec=Ec, Es=Es)
 
         # Compute value for max compression strain within the section strain field
         # In section is only in tension this will be the min tension strain
@@ -115,5 +115,25 @@ def find_na(x, y, xr, yr, dia, P, Mx, My, fyd, Ec=30 * 10 ** 6, Es=200 * 10 ** 6
         print("yn = ", yn)
         print("TRUTH CHECK: ", abs(yn_error) > tol and itr_yn < max_itr)
 
-
     return yn
+
+
+if __name__ == '__main__':
+    b = 0.250
+    h = 0.500
+    dia = [pi * 0.020 ** 2 / 4] * 3  # Rebar diameters [in] (No. 7 bars)
+    c = 0.040
+    Ec = 33
+    Es = 200
+    fyd = 500 / 1.15
+
+    x = [0, b, b, 0]
+    y = [0, 0, h, h]
+    xr = [b / 3, b / 2, 2 / 3 * b]
+    yr = [c, c, c]
+
+    P = -80
+    Mx = 91
+    My = 0
+
+    print('yn =', find_na(x, y, xr, yr, dia, P, Mx, My, fyd, Ec=Ec, Es=Es))
