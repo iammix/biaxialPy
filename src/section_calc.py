@@ -9,19 +9,7 @@ import matplotlib.path as mpltPath
 # Project specific modules
 import geometry
 
-'''
-This module contain various functions for section analysis of reinforced concrete cross 
-sections in both ULS and SLS. 
-'''
 
-# Create log file and set default logging statement
-FORMAT = '%(name)-15s %(message)s'
-filename = 'test.log'
-logging.basicConfig(filename=filename, level=logging.INFO, filemode='w', format=FORMAT)
-
-# NOTE Rebars located between neutral axis and stress block, i.e. in the gap with neither
-#      compression nor tension are not accounted for in the various functions. In reality,
-#      the bars will be in compression, but should maybe not be in the calculation model.
 
 # CONSTANTS
 EC = 30 * 10 ** 6
@@ -29,26 +17,10 @@ ES = 200 * 10 ** 6
 
 
 def Itx(yc, x, y, xr, yr, d, Ec=EC, Es=ES):
-    '''
+    """
     Return moment of inertia for bending about the x-axis of a transformed reinforced concrete
     cross section. The section can have the shape of any non self-intersecting polygon.
-
-    Args:
-        yc (float)            : y-coordinate of axis about which to compute moment of inertia
-        x (list)              : x-coordiantes of concrete vertices
-        y (list)              : y-coordiantes of concrete vertices
-        yr (list)             : y-coordiantes of rebars
-        d (list)              : Rebar diameters corresponding to rebar coordinates in list yr
-        Ec (float, optional)  : Young's modulus for concrete (defaults to 30*10**6)
-        Es (float, optioanl)  : Young's modulus for reinforcement (defaults to 210*10**6 )
-
-    Returns:
-        Itx (float) : Moment of inertia about the x-axis
-    '''
-
-    # THEORY
-    # The computation has to be generalized for any non self-intersecting polygon. The formula
-    # can be found e.g. at https://en.wikipedia.org/wiki/Second_moment_of_area
+    """
 
     n = Es / Ec  # Stiffness ratio
 
@@ -85,25 +57,10 @@ def Itx(yc, x, y, xr, yr, d, Ec=EC, Es=ES):
 
 
 def Ity(xc, x, y, xr, yr, d, Ec=EC, Es=ES):
-    '''
+    """
     Return moment of inertia about the y-axis of a reinforced concrete cross
     section. The section can have the shape of any non self intersecting polygon.
-
-    Args:
-      xc (float)            : x-coordinate of axis about which to compute moment of inertia
-      x (list)              : x-coordinates of concrete vertices
-      y (list)              : y-coordiantes of concrete vertices
-      xr (list)             : x-coordinates of rebars
-      d (list)              : Rebar diameters corresponding to rebar coordinates in list xr
-      Ec (float, optional)  : Young's modulus for concrete (defaults to 30*10**6)
-      Es (float, optioanl)  : Young's modulus for reinforcement (defaults to 210*10**6 )
-
-    Returns:
-      Ity (float) : Moment of inertia about the y-axis
-    '''
-    # THEORY
-    # The computation has to be generalized for any non self-intersecting polygon. The formula
-    # can be found e.g. at https://en.wikipedia.org/wiki/Second_moment_of_area
+    """
 
     n = Es / Ec  # Stiffness ratio
 
@@ -140,29 +97,17 @@ def Ity(xc, x, y, xr, yr, d, Ec=EC, Es=ES):
 
 
 def elastic_centroid(x, y, xr, yr, dia, Ec=EC, Es=ES):
-    '''
+    """
     Return elastic centroid of a transformed reinforced concrete sections.
     Rebars located outside of the concrete defined by x and y is assumed to be
     surrounded by ineffective/crakced concrete.
-
-    Args:
-        par1 (type) :
-        dia (list)      : Rebars diameters
-
-    Returns:
-        ret1 (type) :
-    '''
+    """
 
     # Stiffness ratio
     n = Es / Ec
 
     # Number of rebars
     nb = len(dia)
-
-    # Rebars that are surrounded by ineffective/crakced concrete will have a
-    # transformed stiffness of 'n', while rebars in the compression zone
-    # has 'n-1'. This is due to the fact that rebars in compression have displaced
-    # concrete that would have had stiffness of 'Ec'.
 
     # Evaluate if rebars are inside or outside stress block (returns list with 'True' or 'False')
     rebar_eval = rebars_in_stress_block(x, y, xr, yr)
@@ -202,7 +147,7 @@ def elastic_centroid(x, y, xr, yr, dia, Ec=EC, Es=ES):
 
 
 def transformed_axial_stiffness(x, y, xr, yr, dia, P, Ec=EC, Es=ES):
-    ''' Return axial stiffness EA of transformed concrete section. '''
+    """ Return axial stiffness EA of transformed concrete section. """
 
     # Stiffness ratio
     n = Es / Ec
@@ -237,13 +182,10 @@ def transformed_axial_stiffness(x, y, xr, yr, dia, P, Ec=EC, Es=ES):
 
 
 def strain_field_eval(x, y, P, Mx, My, E, EA, Itx, Ity):
-    '''
+    """
     Return the evaluation of the strain field equation given for external loads
     P, Mx and My in point (x, y).
-
-    Assumptions:
-        Plane sections remain plane, i.e. strain vary linearly over the cross section.
-    '''
+    """
 
     # Axial strain
     eps_P = P / EA
@@ -252,15 +194,13 @@ def strain_field_eval(x, y, P, Mx, My, E, EA, Itx, Ity):
     kappa_x = Mx / (E * Itx)
     kappa_y = My / (E * Ity)
 
-    # NOTE There could be a check to se if strains are larger than allowed, e.g. eps_cu
-
     return eps_P + y * kappa_x + x * kappa_y
 
 
 def compute_plastic_centroid(x, y, xr, yr, As, fck, fyk):
-    ''' Return plastic centroid of a reinforced concrete section. '''
+    """ Return plastic centroid of a reinforced concrete section. """
     Ac = geometry.polygon_area(x, y)
-    eta = 0.85  # TODO Look into whether eta should be an input arg
+    eta = 0.85
     F = sum([As[i] * fyk for i in As]) + eta * (Ac - sum(As)) * fck
 
     # TODO Find correct and general arm for concrete force (polygon section)
@@ -274,16 +214,10 @@ def compute_plastic_centroid(x, y, xr, yr, As, fck, fyk):
 
 
 def compression_tension_rebars(x, y, xr, yr, dia):
-    '''
+    """
     Return lists of rebar coordinates and diameters for rebars in compression
     and tension, respectively.
-
-    Args:
-        par1 (list)     :
-
-    Returns:
-        var10 (list)    :
-    '''
+    """
     # Evaluate if rebars are inside or outside stress block (returns list with 'True' or 'False')
     rebar_eval = rebars_in_stress_block(x, y, xr, yr)
 
@@ -304,13 +238,12 @@ def compression_tension_rebars(x, y, xr, yr, dia):
 
 
 def compute_dist_to_na(x, y, xr, yr, alpha_deg, na_y):
-    ''' Return distances from neutral axis to all concrete section vertices
-        and rebars. '''
+    """ Return distances from neutral axis to all concrete section vertices
+        and rebars. """
     # Convert input angle from [deg] to [rad]
     alpha = alpha_deg * pi / 180
 
     # Define two known points on line representing neutral axis
-    # NOTE Could be done more elegant if the function allowed tan(alpha) and na_y as input
     na_x0 = 0
     na_y0 = tan(alpha) * na_x0 + na_y
     na_x1 = 1
@@ -333,31 +266,11 @@ def compute_dist_to_na(x, y, xr, yr, alpha_deg, na_y):
     return dv, dr
 
 
-# def stress_block_SLS(x, y, alpha_deg, na_y):
-
-#     # return
-
-
 def stress_block_geometry(x, y, dv, dr, alpha_deg, na_y, lambda_=0.8):
-    '''
+    """
     Returns stress block geometry.
+    """
 
-    INPUT
-        x           -   List of x-coordinates of concrete section vertices
-        y           -   List of y-coordinates of concrete section vertices
-        dv          -   List of distances from neutral axis to each section vertex
-        dr          -   List of distances from neutral axis to each rebar
-        alpha_deg   -
-        na_y        -
-
-    OUTPUT
-        x_sb        -   List of x-coordinates of stress block vertices
-        y_sb        -   List of y-coordinates of stress block vertices
-        Asb         -   Area of stress block
-        sb_cog      -   Cenntroid of stress block represented as tuple, i.e. in the format (x, y)
-    '''
-
-    # TODO Split this to multiple functions that are easier to understand and test/debug
 
     # PURE TENSION CASE
     # NOTE Test if this is true! Does not account for gap btw. sb and tension zone
@@ -390,15 +303,11 @@ def stress_block_geometry(x, y, dv, dr, alpha_deg, na_y, lambda_=0.8):
         Asb = geometry.polygon_area(x, y)
         sb_cog = geometry.polygon_centroid(x, y)
 
-    # MIXED TENSION/COMPRESSION CASE
     else:
         cross_section_state = 'MIXED TENSION/COMPRESSION'
 
         # Distance from neutral axis to extreme compression fiber (pos. in tension / negative in compression)
-        # FIXME This might not be correct in all cases (if compression zone is very small, tension will dominate)
         c = min(dv)
-        # NOTE beta_1=0.85 from ACI should be replaced by lambda = 0.8 from Eurocode for concrete strengths < C50 (change also default function input)
-        # Signed distance from inner stress block edge to extreme compression fiber
         a = lambda_ * c
 
         # Signed perpendicular distance between neutral axis and stress block
@@ -409,9 +318,6 @@ def stress_block_geometry(x, y, dv, dr, alpha_deg, na_y, lambda_=0.8):
 
         # Intersection between stress block inner edge and y-axis (parallel with neutral axis)
 
-        # if alpha_deg == 90:
-        #     sb_y_intersect = delta_v - na_y     # NOTE I can't really explain why this conditional is necessary, but it fixed the immediate problem
-        # else:
         sb_y_intersect = na_y - delta_v
 
         # Intersections between inner edge of stress block (parrallel with neutral axis) and section
@@ -425,10 +331,8 @@ def stress_block_geometry(x, y, dv, dr, alpha_deg, na_y, lambda_=0.8):
         y_sb = sb_yint + y_compr_vertices
 
         # Order stress block vertices with respect to centroid for the entire section
-        # NOTE Might fail for non-convex polygons, e.g. a T-beam
         x_sb, y_sb = geometry.order_polygon_vertices(x_sb, y_sb, x, y, counterclockwise=True)
 
-        # NOTE Calc of area and centre of gravity is unnecessary in this function and should be done elsewhere if needed
         # Compute area of the stress block by shoelace algorithm
         Asb = geometry.polygon_area(x_sb, y_sb)
 
@@ -439,19 +343,18 @@ def stress_block_geometry(x, y, dv, dr, alpha_deg, na_y, lambda_=0.8):
 
 
 def compute_rebar_strain(dist_to_na, c, eps_cu):
-    ''' Return strain in each rebar as a list '''
+    """ Return strain in each rebar as a list """
     return [ri / abs(c) * eps_cu for ri in dist_to_na]
 
 
 def compute_rebar_stress(eps_r, Es, fyd):
-    ''' Return stress in each rebar as a list '''
+    """ Return stress in each rebar as a list """
 
     sigma_r = []
     for i in range(len(eps_r)):
         # Linear elastic stress in i'th bar
         si = eps_r[i] * Es
 
-        # NOTE Below could maybe be min(si, fyd), but remember sign!
         # Check if rebar yields
         if abs(si) <= fyd:
             # Computed stress does not exceed yield stress
@@ -488,19 +391,10 @@ def rebars_in_stress_block(x_sb, y_sb, xr, yr):
         rebars_inside = [False] * len(xr)
 
     return rebars_inside
-    # logging.debug('bar {} is inside stress block'.format(i+1))  # TODO Create logging statement
 
 
 def compute_rebar_forces(xr, yr, As, sigma_r, rebars_inside, fcd, lambda_=0.80):
-    ''' Return rebar forces as list.
-
-     Args:
-      rebars_inside (list)  : List of boolean values, 'True' or 'False' for rebars inside
-                              or outside stress block, respectively
-
-    Returns:
-      Fr (list)             : List of rebar forces
-    '''
+    """ Return rebar forces as list."""
     Fr = []  # Forces in each rebar
 
     for i in range(len(xr)):
@@ -516,13 +410,13 @@ def compute_rebar_forces(xr, yr, As, sigma_r, rebars_inside, fcd, lambda_=0.80):
 
 
 def compute_concrete_force(fcd, Asb, lambda_=0.80):
-    ''' Return compression force in the concrete. '''
+    """ Return compression force in the concrete. """
     Fc = -lambda_ * fcd * Asb
     return Fc
 
 
 def compute_moment_vector_angle(Mx, My):
-    '''    Return the angle (in degrees) of the moment vector with respect to the x-axis    '''
+    """    Return the angle (in degrees) of the moment vector with respect to the x-axis    """
     if Mx == 0:
         if My == 0:
             phi = None
@@ -535,7 +429,7 @@ def compute_moment_vector_angle(Mx, My):
 
 
 def compute_C_T_forces(Fc, Fr):
-    '''    Return Compression (C) and Tension (T) forces of the section    '''
+    """    Return Compression (C) and Tension (T) forces of the section    """
     Fr_compr = [p for p in Fr if p <= 0]
     Fr_tension = [p for p in Fr if p > 0]
     C = sum(Fr_compr) + Fc
@@ -545,22 +439,18 @@ def compute_C_T_forces(Fc, Fr):
 
 
 def compute_moment_contributions(xr, yr, Asb, sb_cog, Fc, Fr):
-    ''' Return the moment contributions from concrete and rebars in the cross section. '''
+    """ Return the moment contributions from concrete and rebars in the cross section. """
 
     if Asb == 0:
         Mcx = 0
         Mcy = 0
     else:
-        # FIXME Moment lever arm should be distance between stress block centroid and centroid of transformed section __
-        # FIXME __ Plastic centroid of transformed section happens to be at (0, 0) in the example in MacGregor's example
         # Moment contribution from concrete about x-axis
         Mcx = -Fc * sb_cog[1]
         # Moment contribution from concrete about y-axis
         Mcy = -Fc * sb_cog[0]
 
     # Moment contribution from rebars about x- and y-axis (according to moment sign convention)
-    # FIXME Lever arms should be taken wrt. the centroid of the transformed section, i.e. including reinforcement
-    # NOTE Why not also plastic centroid?
     Mrx = [-Fr[i] * yr[i] for i in range(len(yr))]
     Mry = [-Fr[i] * xr[i] for i in range(len(xr))]
 
@@ -568,11 +458,9 @@ def compute_moment_contributions(xr, yr, Asb, sb_cog, Fc, Fr):
 
 
 def compute_C_T_moments(C, T, Mcx, Mcy, Mry, Mrx, Fr, alpha_deg):
-    '''
+    """
     Return total moments generated in the section by Compression (C) and Tension (T) resisting forces.
-
-    The calculation assumes a left-handed sign convention.
-    '''
+    """
     My_compr = []
     Mx_compr = []
     My_tension = []
@@ -586,7 +474,7 @@ def compute_C_T_moments(C, T, Mcx, Mcy, Mry, Mrx, Fr, alpha_deg):
             Mx_tension.append(Mrx[i])
 
     # Total moment for compression resisting forces (adapted for LH sign convention)
-    if alpha_deg >= 90 and alpha_deg <= 270:
+    if 90 <= alpha_deg <= 270:
         My_C = sum(My_compr) + Mcy
         Mx_C = sum(Mx_compr) + Mcx
     else:
@@ -594,7 +482,7 @@ def compute_C_T_moments(C, T, Mcx, Mcy, Mry, Mrx, Fr, alpha_deg):
         Mx_C = -(sum(Mx_compr) + Mcx)
 
     # Total moment for tension resisting forces (adapted for LH sign convention)
-    if alpha_deg >= 90 and alpha_deg <= 270:
+    if 90 <= alpha_deg <= 270:
         My_T = sum(My_tension)
         Mx_T = sum(Mx_tension)
     else:
@@ -605,7 +493,7 @@ def compute_C_T_moments(C, T, Mcx, Mcy, Mry, Mrx, Fr, alpha_deg):
 
 
 def compute_C_T_forces_eccentricity(C, T, My_C, Mx_C, Mx_T, My_T):
-    '''    Return eccentricity of Compression (C) and Tension (T) forces.    '''
+    """    Return eccentricity of Compression (C) and Tension (T) forces.    """
     # Eccentricities of tension and compression forces
     if C == 0:
         ex_C = np.nan
@@ -625,9 +513,8 @@ def compute_C_T_forces_eccentricity(C, T, My_C, Mx_C, Mx_T, My_T):
 
 
 def perform_section_analysis(x, y, xr, yr, fcd, fyd, Es, eps_cu, As, alpha_deg, na_y, lambda_=0.80):
-    ''' Perform cross section analysis '''
+    """ Perform cross section analysis """
 
-    logging.info('Started logging of section analysis')
 
     dv, dr = compute_dist_to_na(x, y, xr, yr, alpha_deg, na_y)
     x_sb, y_sb, Asb, sb_cog, c = stress_block_geometry(x, y, dv, dr, alpha_deg, na_y, lambda_=lambda_)
@@ -637,26 +524,5 @@ def perform_section_analysis(x, y, xr, yr, fcd, fyd, Es, eps_cu, As, alpha_deg, 
     Fr = compute_rebar_forces(xr, yr, As, sigma_r, rebars_inside, fcd, lambda_=lambda_)
     Fc = compute_concrete_force(fcd, Asb)
 
-    logging.info('dv =' + str(np.round(dv, decimals=2)))
-    logging.info('dr =' + str(np.round(dr, decimals=2)))
-    logging.info('Asb =' + str(np.round(Asb, decimals=2)))
-    logging.info('Fc =' + str(np.round(Fc, decimals=2)))
-    logging.info('eps_r =' + str(eps_r))
-    logging.info('sigma_r =' + str(np.round(sigma_r, decimals=2)))
-    logging.info('Fr =' + str(np.round(Fr, decimals=2)))
-    logging.info('Finished logging of section analysis')
 
     return Fc, Fr, Asb, sb_cog, x_sb, y_sb
-
-
-if __name__ == '__main__':
-    # x = [-8, 8, 8, -8]
-    # y = [8, 8, -8, -8]
-    # alpha_deg = 30
-    # na_y = -2
-    # # Distance from neutral axis to concrete section vertices
-    # dv = [-12.66, -4.66, 9.20, 1.20]
-    # # Distance from neutral axis to rebars
-    # dr = [-9.38, -6.58, -3.78, 1.07, 5.92, 3.12, 0.32, -4.53]
-    # x_sb, y_sb, _, _, _ = compute_stress_block_geometry(x, y, dv, dr, alpha_deg, na_y, lambda_=0.85)
-    pass
