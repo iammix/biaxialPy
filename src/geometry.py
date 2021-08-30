@@ -138,7 +138,7 @@ def order_polygon_vertices(x_vertices, y_vertices, x_section_vertices, y_section
         idx = sorted(range(len(a0)), key=lambda j: a0[j], reverse=False)
         a = sorted(a)
     else:
-        # TODO: Sort list of angles in clockwise order
+        # TODO: [biaxialPy] Sort list of angles in clockwise order
         # assignees: iammix
         # labels: todo
         pass
