@@ -203,7 +203,7 @@ def compute_plastic_centroid(x, y, xr, yr, As, fck, fyk):
     eta = 0.85
     F = sum([As[i] * fyk for i in As]) + eta * (Ac - sum(As)) * fck
 
-    # TODO Find correct and general arm for concrete force (polygon section)
+    # TODO: [biaxialPy] Find correct and general arm for concrete force (polygon section)
     F_dx = sum([As[i] * fyk * xr[i] for i in range(len(xr))]) + eta * (Ac - sum(As)) * fck * 500 / 2
     F_dy = sum([As[i] * fyk * yr[i] for i in range(len(yr))]) + eta * (Ac - sum(As)) * fck * 375 / 2
 

@@ -32,8 +32,8 @@ def plot_capcity_surface(X, Y, Z, plot_type="scatter", labels=['Mx', 'My', 'P'])
     plt.show()
 
 
-def plt_ULS_section(x, y, xr, yr, x_sb, y_sb, Asb, sb_cog, Fc, Fr, Mcx, Mcy, Mrx, Mry, Mx, My, alpha_deg, na_y):
-    """    Returns a plot of ULS section state for given neutral axis location    """
+def plot_ULS_section(x, y, xr, yr, x_sb, y_sb, Asb, sb_cog, Fc, Fr, Mcx, Mcy, Mrx, Mry, Mx, My, alpha_deg, na_y):
+    """Returns a plot of ULS section state for given neutral axis location"""
     phi = sc.compute_moment_vector_angle(Mx, My)
     C, T = sc.compute_C_T_forces(Fc, Fr)
     Mx_C, My_C, Mx_T, My_T = sc.compute_C_T_moments(C, T, Mcx, Mry, Mrx, Fr, alpha_deg)
@@ -67,4 +67,13 @@ def plt_ULS_section(x, y, xr, yr, x_sb, y_sb, Asb, sb_cog, Fc, Fr, Mcx, Mcy, Mrx
     # Plot centroid of stress block
     if Asb != 0:
         plt.plot(sb_cog[0], sb_cog[1], 'x', color='grey', markersize='4')
-        # TODO: [
+        # TODO: [biaxialPy] Radius of rebars on the plot should match the actual radius of the bars
+        # assignees: iammix
+        # labels: todo
+
+    for i in range(len(xr)):
+        ax.add_patch(
+            patches.Circle((xr[i], yr[i]), radius=8, hatch='/////', facecolor='silver', edgecolor='k', linewidth=1))
+
+    plt.show()
+
