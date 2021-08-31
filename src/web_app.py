@@ -400,6 +400,7 @@ def update_section_plot(xy, sv_col, xsys, rebar_col):
     [Input('capacity-surface-results', 'children'),
      Input('load-combs', 'data'),
      Input('load-combs', 'columns')])
+
 def update_capacity_surface(cap_surf_results, loads, load_col):
     # Extract results from capacity surface calculation stored in hidden div
     df_cap_surf = pd.read_json(cap_surf_results, orient='split')
