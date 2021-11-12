@@ -1,9 +1,9 @@
 import dash
 from dash.dependencies import Input, Output, State
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import dash_bootstrap_components as dbc
-import dash_table
+from dash import dash_table
 import plotly.graph_objs as go
 
 # Third party packages
@@ -526,4 +526,4 @@ for js in external_css:
 # app.scripts.config.serve_locally = True
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
