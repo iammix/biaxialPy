@@ -1,6 +1,7 @@
 import pytest
 import src.geometry as geometry
 
+
 def test_line_polygon_intersections():
     angle = 30
     y_intersect = -2

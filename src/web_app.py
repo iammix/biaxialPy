@@ -1,9 +1,8 @@
 import dash
-from dash.dependencies import Input, Output, State
-from dash import dcc
-from dash import html
+import dash_html_components as html
+import dash_core_components as dcc
 import dash_bootstrap_components as dbc
-from dash import dash_table
+import dash_table
 import plotly.graph_objs as go
 
 # Third party packages
@@ -336,9 +335,6 @@ def calc_cap_surf_and_store(xy, sv_col, xsys, rebar_col):
      Input('section-vertices', 'columns'),
      Input('rebar-locations', 'data'),
      Input('rebar-locations', 'columns')])
-
-
-
 def update_section_plot(xy, sv_col, xsys, rebar_col):
     # Read in data as dataframes
     df_sv = pd.DataFrame(xy, columns=[c['name'] for c in sv_col])
@@ -400,7 +396,6 @@ def update_section_plot(xy, sv_col, xsys, rebar_col):
     [Input('capacity-surface-results', 'children'),
      Input('load-combs', 'data'),
      Input('load-combs', 'columns')])
-
 def update_capacity_surface(cap_surf_results, loads, load_col):
     # Extract results from capacity surface calculation stored in hidden div
     df_cap_surf = pd.read_json(cap_surf_results, orient='split')
@@ -473,8 +468,6 @@ def update_capacity_surface(cap_surf_results, loads, load_col):
     [Input('capacity-surface-results', 'children'),
      Input('load-combs', 'data'),
      Input('load-combs', 'columns')])
-
-
 def update_columns(cap_surf_results, loads, load_col):
     # Extract results from capacity surface calculation stored in hidden div
     df_cap_surf = pd.read_json(cap_surf_results, orient='split')
