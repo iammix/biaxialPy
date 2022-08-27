@@ -1,12 +1,8 @@
 # Built-in libraries
 from math import pi, cos, sin, tan, atan, atan2, sqrt, ceil, floor
 import logging
-
-# Third party libraries
 import numpy as np
 import matplotlib.path as mpltPath
-
-# Project specific modules
 import geometry
 
 

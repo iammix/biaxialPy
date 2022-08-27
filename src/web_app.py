@@ -1,8 +1,7 @@
 import dash
-import dash_html_components as html
+from dash import Output, Input, State, dash_table, html, dcc
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
-import dash_table
 import plotly.graph_objs as go
 
 # Third party packages
@@ -515,8 +514,8 @@ for js in external_css:
     app.scripts.append_script({'external_url': js})
 
 # # Activate the two lines below when running offline
-# app.css.config.serve_locally = True
-# app.scripts.config.serve_locally = True
+app.css.config.serve_locally = True
+app.scripts.config.serve_locally = True
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
